@@ -95,27 +95,27 @@ const AirportsPage = {
                 });
         }
 
-        // Слушатель для ввода текста (работает «на лету»)
+        
         searchInput.addEventListener('input', applyFilter);
 
-        // Кнопка очистки
+        
         clearBtn.addEventListener('click', () => {
             searchInput.value = "";
             renderTable(allAirports);
         });
 
-        // Загружаем данные из БД
+        
         loadAirportsData();
 
         tableBody.addEventListener('click', (e) => {
             const row = e.target.closest('.clickable-row');
             if (row) {
                 const code = row.dataset.code;
-                window.location.hash = `airport/${code}`; // Генерирует хэш #airport/SVO
+                window.location.hash = `airport/${code}`; 
             }
         });
                 
-        // Возвращаем функцию очистки, если она понадобится роутеру
+        
         return () => {
             searchInput.removeEventListener('input', applyFilter);
         };

@@ -33,7 +33,7 @@ CRASH_CAUSES = (
     'Navigation system failure led the aircraft into unsafe terrain conditions.',
     'Hydraulic failure made the aircraft impossible to control safely.',
     'Runway incident during takeoff or landing caused catastrophic damage.',
-    'Fuel system failure caused power loss across critical aircraft systems.'3.dcefffee
+    'Fuel system failure caused power loss across critical aircraft systems.'
 )
 
 db.init_app(app)
