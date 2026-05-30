@@ -1,0 +1,277 @@
+.flights-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.flights-container > div:first-child {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.flights-container h2 {
+    font-size: 28px;
+    color: #1a202c;
+    margin: 0;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.btn-secondary {
+    background-color: #ffffff;
+    color: #4a5568;
+    border: 1px solid #cbd5e0;
+    padding: 10px 20px;
+    font-size: 14px;
+    font-weight: 600;
+    /* border-radius: 8px; */
+    cursor: pointer;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+.btn-secondary:hover {
+    background-color: #1a202c;
+    color: #ffffff;
+    border-color: #1a202c;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.filters-panel {
+    display: flex;
+    gap: 16px;
+    background: #ffffff;
+    padding: 24px;
+    /* border-radius: 16px; */
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+    margin-bottom: 30px;
+    align-items: flex-end;
+    flex-wrap: wrap;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-group label {
+    font-size: 11px;
+    font-weight: 700;
+    color: #a0aec0;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+
+.filters-panel select,
+.filters-panel input[type="date"] {
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid #e2e8f0;
+    /* border-radius: 8px; */
+    font-size: 14px;
+    background-color: #f7fafc;
+    color: #2d3748;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    min-width: 190px;
+}
+
+.filters-panel select:focus,
+.filters-panel input[type="date"]:focus {
+    border-color: #3182ce;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+.table-wrapper {
+    background: transparent;
+    overflow-x: auto;
+    padding: 4px;
+}
+
+.flights-table,
+.airports-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0 10px;
+    text-align: left;
+    font-size: 14px;
+    margin-top: -10px;
+}
+
+.flights-table th,
+.airports-table th {
+    color: #718096;
+    font-weight: 700;
+    padding: 12px 24px;
+    text-transform: uppercase;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    border: none;
+    position: sticky;
+    top: 0;
+    background: transparent;
+}
+
+.flights-table td,
+.airports-table td {
+    padding: 18px 24px;
+    color: #4a5568;
+    vertical-align: middle;
+    background: #ffffff;
+    border-top: 1px solid #edf2f7;
+    border-bottom: 1px solid #edf2f7;
+    transition: all 0.2s ease;
+}
+
+.flights-table td:first-child,
+.airports-table td:first-child {
+    border-left: 1px solid #edf2f7;
+    /* border-top-left-radius: 12px; */
+    /* border-bottom-left-radius: 12px; */
+}
+
+.flights-table td:last-child,
+.airports-table td:last-child {
+    border-right: 1px solid #edf2f7;
+    /* border-top-right-radius: 12px; */
+    /* border-bottom-right-radius: 12px; */
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+.clickable-row:hover td {
+    background-color: #ffffff;
+    border-color: #cbd5e0;
+    color: #1a202c;
+}
+
+.clickable-row:hover td:first-child {
+    border-left-color: #cbd5e0;
+}
+
+.clickable-row:hover td:last-child {
+    border-right-color: #cbd5e0;
+}
+
+.clickable-row:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.04);
+    transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.2s ease;
+}
+
+.flights-table strong,
+.airports-table strong {
+    color: #1a202c;
+    font-weight: 700;
+    font-size: 15px;
+}
+
+.airport-badge {
+    background: #f7fafc;
+    color: #2d3748;
+    font-weight: 700;
+    /* border-radius: 6px; */
+    padding: 4px 10px;
+    font-family: 'Courier New', Courier, monospace;
+    border: 1px solid #e2e8f0;
+    display: inline-block;
+    font-size: 13px;
+    margin-right: 4px;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.01);
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 6px 14px;
+    /*border-radius: 8px;*/
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    letter-spacing: 0.02em;
+}
+
+.status-scheduled {
+    background-color: #fffaf0;
+    color: #dd6b20;
+    border: 1px solid #dd6b20;
+}
+
+.status-inflight {
+    background-color: #f0fff4;
+    color: #38a169;
+    border: 1px solid #38a169;
+    animation: pulse-activity 2s infinite;
+}
+
+@keyframes pulse-activity {
+    0% { box-shadow: 0 0 0 0 rgba(56, 161, 105, 0.2); }
+    70% { box-shadow: 0 0 0 6px rgba(56, 161, 105, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(56, 161, 105, 0); }
+}
+
+.status-arrived {
+    background-color: #f7fafc;
+    color: #718096;
+    border: 1px solid #e2e8f0;
+}
+
+.status-crashed {
+    background-color: #fff5f5;
+    color: #e53e3e;
+    border: 1px solid #feb2b2;
+}
+
+.airports-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    box-sizing: border-box;
+}
+
+.airports-container h2 {
+    font-size: 28px;
+    color: #1a202c;
+    margin: 0 0 24px 0;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+}
+
+.airports-container .filters-panel .filter-group input[type="text"] {
+    height: 42px;
+    padding: 0 14px;
+    border: 1px solid #e2e8f0;
+    /* border-radius: 8px; */
+    font-size: 14px;
+    background-color: #f7fafc;
+    color: #2d3748;
+    outline: none;
+    box-sizing: border-box;
+    transition: all 0.2s ease;
+    min-width: 320px;
+}
+
+.airports-container .filters-panel .filter-group input[type="text"]:focus {
+    border-color: #3182ce;
+    background-color: #ffffff;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+}
+
+.airports-container .airport-badge {
+    background: #ebf8ff;
+    color: #3182ce;
+    border: 1px solid #3182ce;
+}

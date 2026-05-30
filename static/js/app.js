@@ -1,85 +1,144 @@
 const appContent = document.getElementById('app-content');
-let currentDestroyFn = null; 
+let currentDestroyFn = null;
+
+function setActiveNav(hash) {
+    let activeHash = hash;
+    if (hash === '#register') activeHash = '#auth';
+    if (hash.startsWith('#flights/') || hash.startsWith('#crashed-flight/')) activeHash = '#flights';
+
+    document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.toggle('active', link.getAttribute('href') === activeHash);
+    });
+}
+
+function mountPage(page, initArg = null) {
+    appContent.innerHTML = page.render(initArg);
+
+    setTimeout(() => {
+        const destroy = page.init(initArg);
+        if (typeof destroy === 'function') {
+            currentDestroyFn = destroy;
+        }
+    }, 0);
+}
 
 function router() {
     const hash = window.location.hash || '#map';
-    
-    document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.toggle('active', link.getAttribute('href') === hash);
-    });
+    const routeHash = hash.split('?')[0];
+
+    setActiveNav(routeHash);
 
     if (currentDestroyFn) {
         currentDestroyFn();
         currentDestroyFn = null;
     }
 
-    if (hash.startsWith('#flight/')) {
-        const flightId = hash.split('/')[1]; 
-
-        appContent.innerHTML = FlightDetailsPage.render();
-        setTimeout(() => {
-            const destroy = FlightDetailsPage.init(flightId);
-            if (typeof destroy === 'function') {
-                currentDestroyFn = destroy;
-            }
-        }, 0);
+    if (routeHash.startsWith('#flight/')) {
+        mountPage(FlightDetailsPage, routeHash.split('/')[1]);
         return;
     }
 
-    if (hash.startsWith('#airport/')) {
-        const airportCode = hash.split('/')[1]; 
+    if (routeHash.startsWith('#crashed-flight/')) {
+        if (!AuthState.isVerified()) {
+            appContent.innerHTML = '<div class="placeholder-page"><h2>Access denied</h2></div>';
+            return;
+        }
 
-        appContent.innerHTML = AirportDetailsPage.render();
-        setTimeout(() => {
-            const destroy = AirportDetailsPage.init(airportCode);
-            if (typeof destroy === 'function') {
-                currentDestroyFn = destroy;
-            }
-        }, 0);
+        mountPage(CrashedFlightDetailsPage, routeHash.split('/')[1]);
         return;
     }
 
-    switch (hash) {
+    if (routeHash.startsWith('#airport/')) {
+        mountPage(AirportDetailsPage, routeHash.split('/')[1]);
+        return;
+    }
+
+    if (routeHash.startsWith('#flights/edit/')) {
+        if (!AuthState.isVerified()) {
+            appContent.innerHTML = '<div class="placeholder-page"><h2>Access denied</h2></div>';
+            return;
+        }
+
+        mountPage(FlightFormPage, routeHash.split('/')[2]);
+        return;
+    }
+
+    switch (routeHash) {
         case '#map':
-            appContent.innerHTML = MapPage.render();
-            setTimeout(() => {
-                currentDestroyFn = MapPage.init();
-            }, 0);
+            mountPage(MapPage);
             break;
-            
+
         case '#flights':
-            appContent.innerHTML = FlightsPage.render();
-            setTimeout(() => {
-                const destroy = FlightsPage.init();
-                if (typeof destroy === 'function') {
-                    currentDestroyFn = destroy;
-                }
-            }, 0);
+            mountPage(FlightsPage);
             break;
-            
+
+        case '#flights/new':
+            if (!AuthState.isVerified()) {
+                appContent.innerHTML = '<div class="placeholder-page"><h2>Access denied</h2></div>';
+                break;
+            }
+            mountPage(FlightFormPage);
+            break;
+
         case '#airports':
-            appContent.innerHTML = AirportsPage.render();
-            setTimeout(() => {
-                const destroy = AirportsPage.init();
-                if (typeof destroy === 'function') {
-                    currentDestroyFn = destroy;
-                }
-            }, 0);
+            mountPage(AirportsPage);
             break;
-            
+
+        case '#airplanes/new':
+            if (!AuthState.isVerified()) {
+                appContent.innerHTML = '<div class="placeholder-page"><h2>Access denied</h2></div>';
+                break;
+            }
+            mountPage(AirplaneFormPage);
+            break;
+
+        case '#airports/new':
+            if (!AuthState.isVerified()) {
+                appContent.innerHTML = '<div class="placeholder-page"><h2>Access denied</h2></div>';
+                break;
+            }
+            mountPage(AirportFormPage);
+            break;
+
+        case '#employees/new':
+            if (!AuthState.isVerified()) {
+                appContent.innerHTML = '<div class="placeholder-page"><h2>Access denied</h2></div>';
+                break;
+            }
+            mountPage(EmployeeFormPage);
+            break;
+
+        case '#passengers/new':
+            if (!AuthState.isVerified()) {
+                appContent.innerHTML = '<div class="placeholder-page"><h2>Access denied</h2></div>';
+                break;
+            }
+            mountPage(PassengerFormPage);
+            break;
+
         case '#auth':
-            appContent.innerHTML = `
-                <div class="placeholder-page">
-                    <h2>Авторизация</h2>
-                    <p>Форма регистрации и входа появится здесь на следующих этапах.</p>
-                </div>`;
+            mountPage(LoginPage);
             break;
-            
+
+        case '#register':
+            mountPage(RegisterPage);
+            break;
+
+        case '#admin/users':
+            if (!AuthState.isAdmin()) {
+                appContent.innerHTML = '<div class="placeholder-page"><h2>Access denied</h2></div>';
+                break;
+            }
+            mountPage(AdminUsersPage);
+            break;
+
         default:
             appContent.innerHTML = '<div class="placeholder-page"><h2>Страница не найдена (404)</h2></div>';
     }
 }
 
 window.addEventListener('hashchange', router);
-
-window.addEventListener('DOMContentLoaded', router);
+window.addEventListener('DOMContentLoaded', async () => {
+    await AuthState.init();
+    router();
+});

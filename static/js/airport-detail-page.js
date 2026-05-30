@@ -29,7 +29,7 @@ const AirportDetailsPage = {
                     return res.json();
                 })
                 .then(data => {
-                    // Рендерим HTML
+                    
                     contentBlock.innerHTML = `
                         <div class="airport-main-card" style="display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 30px;">
                             <div class="airport-info-side" style="flex: 1; min-width: 300px;">
@@ -39,7 +39,7 @@ const AirportDetailsPage = {
                                 </div>
                                 <h3 style="color: #4a5568; font-weight: normal; margin-bottom: 20px;">${data.name}</h3>
                                 <p style="color: #718096; font-size: 0.95rem; line-height: 1.5;">
-                                    Этот узел обслуживает внутренние и международные рейсы. Ниже представлено актуальное расписание прибытия и отправления бортов.
+                                    This node serves domestic and international flights. The following is the current schedule of arrivals and departures.
                                 </p>
                             </div>
                             
@@ -47,18 +47,18 @@ const AirportDetailsPage = {
                         </div>
 
                         <div class="airport-schedule-block">
-                            <h3 style="margin-bottom: 15px;">Расписание рейсов (Запланированные / В полете / Завершенные)</h3>
+                            <h3 style="margin-bottom: 15px;">Flight Schedule (Scheduled / In Flight / Completed)</h3>
                             <div class="table-wrapper">
                                 <table class="flights-table">
                                     <thead>
                                         <tr>
-                                            <th>Рейс</th>
-                                            <th>Тип</th>
-                                            <th>Направление</th>
-                                            <th>Самолет</th>
-                                            <th>Время вылета</th>
-                                            <th>Время прилета</th>
-                                            <th>Статус</th>
+                                            <th>Flight</th>
+                                            <th>Type</th>
+                                            <th>Direction</th>
+                                            <th>Aircraft</th>
+                                            <th>Departure Time</th>
+                                            <th>Arrival Time</th>
+                                            <th>Status</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -69,8 +69,8 @@ const AirportDetailsPage = {
 
                                             const isDeparture = f.departure_airport.code === data.code;
                                             const typeBadge = isDeparture 
-                                                ? `<span style="color: #dd6b20; background: #feebc8; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Вылет</span>`
-                                                : `<span style="color: #3182ce; background: #ebf8ff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Прилет</span>`;
+                                                ? `<span style="color: #dd6b20; background: #feebc8; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Departure</span>`
+                                                : `<span style="color: #3182ce; background: #ebf8ff; padding: 2px 6px; border-radius: 4px; font-size: 0.8rem;">Arrival</span>`;
 
                                             const directionText = isDeparture
                                                 ? `В ${f.arrival_airport.city} (${f.arrival_airport.code})`
@@ -90,7 +90,7 @@ const AirportDetailsPage = {
                                         }).join('') : `
                                             <tr>
                                                 <td colspan="7" style="text-align: center; color: #718096; padding: 20px;">
-                                                    Рейсов не обнаружено.
+                                                    No flights found.
                                                 </td>
                                             </tr>
                                         `}
@@ -100,17 +100,17 @@ const AirportDetailsPage = {
                         </div>
                     `;
 
-                    // Инициализация карты OpenLayers
+                    
                     if (typeof ol !== 'undefined') {
-                        // Преобразуем координаты из GPS (EPSG:4326) в проекцию карты OpenLayers (EPSG:3857)
+                        
                         const airportCoords = ol.proj.fromLonLat([data.longitude, data.latitude]);
 
-                        // Создаем маркер в виде точки
+                        
                         const markerFeature = new ol.Feature({
                             geometry: new ol.geom.Point(airportCoords)
                         });
 
-                        // Задаем стиль маркеру (красный пин авиации)
+                        
                         markerFeature.setStyle(new ol.style.Style({
                             image: new ol.style.Circle({
                                 radius: 7,
@@ -127,7 +127,7 @@ const AirportDetailsPage = {
                             source: vectorSource
                         });
 
-                        // Собираем карту
+                        
                         mapInstance = new ol.Map({
                             target: 'airportMiniMap',
                             layers: [
@@ -140,7 +140,7 @@ const AirportDetailsPage = {
                                 center: airportCoords,
                                 zoom: 11
                             }),
-                            controls: [] // убираем дефолтные кнопки зума, чтобы виджет выглядел минималистично
+                            controls: [] 
                         });
                     }
                 })
@@ -148,14 +148,14 @@ const AirportDetailsPage = {
                     console.error(err);
                     contentBlock.innerHTML = `
                         <div style="text-align: center; color: #e53e3e; padding: 40px;">
-                            <h3>Не удалось загрузить данные об аэропорте</h3>
+                            <h3>Failed to load airport data</h3>
                             <p>${err.message}</p>
                         </div>
                     `;
                 });
         }
 
-        // Переход на детали рейса по клику на строчку расписания
+        
         contentBlock.addEventListener('click', (e) => {
             const row = e.target.closest('.clickable-flight-row');
             if (row) {
@@ -165,7 +165,7 @@ const AirportDetailsPage = {
 
         loadAirportDetails();
 
-        // Функция очистки при смене страницы в SPA
+        
         return () => {
             if (mapInstance) {
                 mapInstance.setTarget(null);

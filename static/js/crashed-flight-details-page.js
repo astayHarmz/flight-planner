@@ -1,24 +1,28 @@
-const FlightDetailsPage = {
+const CrashedFlightDetailsPage = {
     render(flightId) {
         return `
             <div class="flight-details-container">
                 <div class="back-panel">
-                    ${AuthState.isVerified() ? `<a href="#flights/edit/${flightId}" class="btn-secondary">Edit</a>` : ''}
-                    <button id="backToPreviousPageBtn" class="btn-secondary">Back</button>
+                    <button id="backToFlightsBtn" class="btn-secondary">Back to flights</button>
                 </div>
 
-                <div id="flightDetailsContent">
-                    <div>Loading flight details...</div>
+                <div id="crashedFlightDetailsContent">
+                    <div>Loading crash report...</div>
                 </div>
             </div>
         `;
     },
 
     init(flightId) {
-        const contentBlock = document.getElementById('flightDetailsContent');
+        const contentBlock = document.getElementById('crashedFlightDetailsContent');
+        const backBtn = document.getElementById('backToFlightsBtn');
+
+        function handleBackClick() {
+            window.location.hash = '#flights';
+        }
 
         function formatDateTime(isoString) {
-            return new Date(isoString).toLocaleString('ru-RU', {
+            return new Date(isoString).toLocaleString('en-US', {
                 day: '2-digit',
                 month: 'long',
                 year: 'numeric',
@@ -27,18 +31,12 @@ const FlightDetailsPage = {
             });
         }
 
-        function getDuration(departure, arrival) {
-            const diffMs = new Date(arrival) - new Date(departure);
-            const totalMinutes = Math.floor(diffMs / (1000 * 60));
-            const hours = Math.floor(totalMinutes / 60);
-            const minutes = totalMinutes % 60;
-            return `${hours} h ${minutes} min`;
-        }
+        function statusBadge(status) {
+            const cssClass = status === 'Dead' || status === 'Crashed'
+                ? 'status-crashed'
+                : 'status-arrived';
 
-        function getStatusClass(status) {
-            if (status === 'In Flight') return 'status-inflight';
-            if (status === 'Arrived') return 'status-arrived';
-            return 'status-scheduled';
+            return `<span class="status-badge ${cssClass}">${status}</span>`;
         }
 
         function avatarCell(imagePath, firstName, lastName, fallbackPath) {
@@ -54,7 +52,7 @@ const FlightDetailsPage = {
 
         function renderCrewTable(crew) {
             if (!crew || crew.length === 0) {
-                return '<p class="empty-list-text">Crew has not been assigned yet.</p>';
+                return '<p class="empty-list-text">Crew has not been assigned.</p>';
             }
 
             const canSeeContracts = crew.some(member => member.employee_number);
@@ -65,6 +63,7 @@ const FlightDetailsPage = {
                         <tr>
                             <th>Employee</th>
                             <th>Role</th>
+                            <th>Status</th>
                             ${canSeeContracts ? '<th>Contract number</th>' : ''}
                         </tr>
                     </thead>
@@ -72,7 +71,8 @@ const FlightDetailsPage = {
                         ${crew.map(member => `
                             <tr>
                                 <td>${avatarCell(member.image_path, member.first_name, member.last_name, '/static/img/crew/placeholder.png')}</td>
-                                <td><span class="role-badge role-${member.role.toLowerCase().replace(' ', '-')}">${member.role}</span></td>
+                                <td>${member.role}</td>
+                                <td>${statusBadge(member.status || 'Alive')}</td>
                                 ${canSeeContracts ? `<td class="muted-text">${member.employee_number}</td>` : ''}
                             </tr>
                         `).join('')}
@@ -83,7 +83,7 @@ const FlightDetailsPage = {
 
         function renderPassengerTable(passengers) {
             if (!passengers || passengers.length === 0) {
-                return '<p class="empty-list-text">There are no registered passengers for this flight yet.</p>';
+                return '<p class="empty-list-text">There are no registered passengers for this flight.</p>';
             }
 
             const canSeePassports = passengers.some(passenger => passenger.passport_number);
@@ -94,6 +94,7 @@ const FlightDetailsPage = {
                         <tr>
                             <th>#</th>
                             <th>Passenger</th>
+                            <th>Status</th>
                             ${canSeePassports ? '<th>Passport number</th>' : ''}
                         </tr>
                     </thead>
@@ -102,6 +103,7 @@ const FlightDetailsPage = {
                             <tr>
                                 <td class="muted-text">${index + 1}</td>
                                 <td>${avatarCell(passenger.image_path, passenger.first_name, passenger.last_name, '/static/img/passengers/placeholder.png')}</td>
+                                <td>${statusBadge(passenger.status || 'Alive')}</td>
                                 ${canSeePassports ? `<td class="passport-text">${passenger.passport_number}</td>` : ''}
                             </tr>
                         `).join('')}
@@ -110,14 +112,12 @@ const FlightDetailsPage = {
             `;
         }
 
-        function renderFlightDetails(flight) {
-            const statusClass = getStatusClass(flight.status);
-
+        function renderCrashReport(flight) {
             return `
                 <div class="flight-main-card">
                     <div class="flight-header">
-                        <h1>Flight ${flight.flight_number}</h1>
-                        <span class="status-badge ${statusClass}">${flight.status}</span>
+                        <h1>Crash Report: Flight ${flight.flight_number}</h1>
+                        ${statusBadge(flight.status)}
                     </div>
 
                     <div class="flight-route-grid">
@@ -130,7 +130,7 @@ const FlightDetailsPage = {
 
                         <div class="route-duration">
                             <div class="duration-line">→</div>
-                            <div class="duration-value">Duration: ${getDuration(flight.departure_time, flight.arrival_time)}</div>
+                            <div class="duration-value">Crashed before arrival</div>
                         </div>
 
                         <div class="route-point text-right">
@@ -142,9 +142,15 @@ const FlightDetailsPage = {
                     </div>
 
                     <div class="airplane-info-block">
+                        <h3>Crash Cause</h3>
+                        <p>${flight.crash_cause || 'Cause has not been recorded yet.'}</p>
+                    </div>
+
+                    <div class="airplane-info-block">
                         <h3>Aircraft</h3>
                         <p><strong>Model:</strong> ${flight.airplane.model} (${flight.airplane.tail_number})</p>
                         <p><strong>Capacity:</strong> ${flight.airplane.capacity} passengers</p>
+                        <p><strong>Status:</strong> ${statusBadge(flight.airplane.status || 'Crashed')}</p>
                     </div>
                 </div>
 
@@ -162,33 +168,38 @@ const FlightDetailsPage = {
             `;
         }
 
-        async function loadFlightDetails() {
+        async function loadCrashReport() {
             try {
-                const response = await fetch(`/api/flights/${flightId}`);
-                if (!response.ok) throw new Error('Flight not found');
+                const response = await fetch(`/api/flights/${flightId}`, { credentials: 'include' });
+                if (!response.ok) throw new Error('Crash report not found');
 
                 const flight = await response.json();
-                if (flight.status === 'Crashed' && AuthState.isVerified()) {
-                    window.location.hash = `crashed-flight/${flight.id}`;
+                if (flight.status !== 'Crashed') {
+                    window.location.hash = `flight/${flight.id}`;
                     return;
                 }
-                contentBlock.innerHTML = renderFlightDetails(flight);
+
+                contentBlock.innerHTML = renderCrashReport(flight);
             } catch (err) {
-                console.error(err);
                 contentBlock.innerHTML = `
                     <div>
-                        <h3>Failed to load flight details</h3>
+                        <h3>Failed to load crash report</h3>
                         <p>${err.message}</p>
                     </div>
                 `;
             }
         }
 
-        const backBtn = document.getElementById('backToPreviousPageBtn');
         if (backBtn) {
-            backBtn.addEventListener('click', () => window.history.back());
+            backBtn.addEventListener('click', handleBackClick);
         }
 
-        loadFlightDetails();
+        loadCrashReport();
+
+        return () => {
+            if (backBtn) {
+                backBtn.removeEventListener('click', handleBackClick);
+            }
+        };
     }
 };

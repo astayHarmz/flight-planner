@@ -24,6 +24,7 @@ class Flight(db.Model):
     departure_time = db.Column(db.DateTime(timezone=True), nullable=False)
     arrival_time = db.Column(db.DateTime(timezone=True), nullable=False)
     status = db.Column(db.String(20), nullable=False, default='Scheduled')
+    crash_cause = db.Column(db.Text, nullable=True)
 
     passengers = db.relationship('Passenger', secondary=flight_passengers, backref=db.backref('flights', lazy=True))
     crew = db.relationship('Employee', secondary=flight_crew, backref=db.backref('flights', lazy=True))

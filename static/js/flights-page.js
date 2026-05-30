@@ -1,51 +1,55 @@
-const FlightsPage = {
+﻿const FlightsPage = {
     render() {
         return `
             <div class="flights-container">
-                <h2>Табло рейсов</h2>
+                <div>
+                    <h2>Flights</h2>
+                    ${AuthState.isVerified() ? '<a href="#flights/new" class="btn-secondary">New flight</a>' : ''}
+                </div>
                 
                 <div class="filters-panel">
                     <div class="filter-group">
-                        <label for="filterStatus">Статус</label>
+                        <label for="filterStatus">Status</label>
                         <select id="filterStatus">
-                            <option value="">Все статусы</option>
-                            <option value="Scheduled">Scheduled (Запланирован)</option>
-                            <option value="In Flight">In Flight (В полете)</option>
-                            <option value="Arrived">Arrived (Прибыл)</option>
+                            <option value="">All statuses</option>
+                            <option value="Scheduled">Scheduled</option>
+                            <option value="In Flight">In Flight</option>
+                            <option value="Arrived">Arrived</option>
+                            ${AuthState.isVerified() ? '<option value="Crashed">Crashed</option>' : ''}
                         </select>
                     </div>
 
                     <div class="filter-group">
-                        <label for="filterCity">Город (Вылет/Прилет)</label>
+                        <label for="filterCity">City</label>
                         <select id="filterCity">
-                            <option value="">Все города</option>
+                            <option value="">All cities</option>
                         </select>
                     </div>
 
                     <div class="filter-group">
-                        <label for="filterDate">Дата вылета</label>
+                        <label for="filterDate">Departure date</label>
                         <input type="date" id="filterDate">
                     </div>
 
-                    <button id="resetFiltersBtn" class="btn-secondary">Сбросить</button>
+                    <button id="resetFiltersBtn" class="btn-secondary">Reset filters</button>
                 </div>
 
                 <div class="table-wrapper">
                     <table class="flights-table">
                         <thead>
                             <tr>
-                                <th>Рейс</th>
-                                <th>Самолет</th>
-                                <th>Откуда</th>
-                                <th>Куда</th>
-                                <th>Вылет</th>
-                                <th>Прилет</th>
-                                <th>Статус</th>
+                                <th>Flight</th>
+                                <th>Aircraft</th>
+                                <th>From</th>
+                                <th>To</th>
+                                <th>Departure</th>
+                                <th>Arrival</th>
+                                <th>Status</th>
                             </tr>
                         </thead>
                         <tbody id="flightsTableBody">
                             <tr>
-                                <td colspan="7" style="text-align: center; color: #718096;">Загрузка рейсов...</td>
+                                <td colspan="7">Loading flights...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -65,9 +69,9 @@ const FlightsPage = {
 
         function formatDateTime(isoString) {
             const dateObj = new Date(isoString);
-            const dateStr = dateObj.toLocaleDateString('ru-RU');
-            const timeStr = dateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-            return `${dateStr} в ${timeStr}`;
+            const dateStr = dateObj.toLocaleDateString();
+            const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return `${dateStr} ${timeStr}`;
         }
 
         function fillCityFilter(flights) {
@@ -80,7 +84,7 @@ const FlightsPage = {
 
             const sortedCities = Array.from(citiesSet).sort();
             
-            let optionsHtml = '<option value="">Все города</option>';
+            let optionsHtml = '<option value="">All cities</option>';
             sortedCities.forEach(city => {
                 optionsHtml += `<option value="${city}">${city}</option>`;
             });
@@ -91,8 +95,8 @@ const FlightsPage = {
             if (!flights || flights.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="7" style="text-align: center; padding: 20px; color: #718096;">
-                            Рейсы не найдены
+                        <td colspan="7">
+                            No flights found
                         </td>
                     </tr>`;
                 return;
@@ -103,11 +107,13 @@ const FlightsPage = {
                 let statusClass = 'status-scheduled';
                 if (flight.status === 'In Flight') statusClass = 'status-inflight';
                 if (flight.status === 'Arrived') statusClass = 'status-arrived';
+                if (flight.status === 'Crashed') statusClass = 'status-crashed';
+                const crashedStyle = flight.status === 'Crashed' ? 'background: #fff5f5; color: #c53030;' : '';
 
                 rowsHtml += `
-                    <tr class="clickable-row" data-id="${flight.id}" style="cursor: pointer;">
+                    <tr class="clickable-row" data-id="${flight.id}" data-status="${flight.status}">
                         <td><strong>${flight.flight_number}</strong></td>
-                        <td style="color: #4a5568;">${flight.airplane.model}</td>
+                        <td>${flight.airplane.model}</td>
                         <td><span class="airport-badge">${flight.departure_airport.code}</span> ${flight.departure_airport.city}</td>
                         <td><span class="airport-badge">${flight.arrival_airport.code}</span> ${flight.arrival_airport.city}</td>
                         <td>${formatDateTime(flight.departure_time)}</td>
@@ -154,13 +160,15 @@ const FlightsPage = {
             fetch('/api/flights')
                 .then(res => res.json())
                 .then(data => {
-                    allFlights = data;
+                    allFlights = AuthState.isVerified()
+                        ? data
+                        : data.filter(flight => flight.status !== 'Crashed');
                     fillCityFilter(allFlights);
                     renderTable(allFlights);
                 })
                 .catch(err => {
-                    console.error("Ошибка загрузки данных:", err);
-                    tableBody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: red;">Ошибка сервера</td></tr>`;
+                    console.error("Failed to load flights:", err);
+                    tableBody.innerHTML = `<tr><td colspan="7">Server error</td></tr>`;
                 });
         }
 
@@ -179,7 +187,9 @@ const FlightsPage = {
             const row = e.target.closest('.clickable-row');
             if (row) {
                 const flightId = row.dataset.id;
-                window.location.hash = `flight/${flightId}`;
+                window.location.hash = row.dataset.status === 'Crashed'
+                    ? `crashed-flight/${flightId}`
+                    : `flight/${flightId}`;
             }
         });
 

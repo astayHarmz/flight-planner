@@ -2,28 +2,28 @@ const AirportsPage = {
     render() {
         return `
             <div class="airports-container">
-                <h2>База аэропортов</h2>
+                <h2>Airport Database</h2>
                 
                 <div class="filters-panel">
-                    <div class="filter-group" style="flex-grow: 1;">
-                        <label for="searchAirport">Поиск аэропорта</label>
-                        <input type="text" id="searchAirport" placeholder="Введите город, код или название аэропорта...">
+                    <div class="filter-group">
+                        <label for="searchAirport">Search Airport</label>
+                        <input type="text" id="searchAirport" placeholder="Enter city, code or name">
                     </div>
-                    <button id="clearSearchBtn" class="btn-secondary" style="align-self: flex-end;">Сбросить</button>
+                    <button id="clearSearchBtn" class="btn-secondary">Clear</button>
                 </div>
 
                 <div class="table-wrapper">
                     <table class="airports-table">
                         <thead>
                             <tr>
-                                <th>Код IATA</th>
-                                <th>Город</th>
-                                <th>Название аэропорта</th>
+                                <th>IATA Code</th>
+                                <th>City</th>
+                                <th>Airport Name</th>
                             </tr>
                         </thead>
                         <tbody id="airportsTableBody">
                             <tr>
-                                <td colspan="5" style="text-align: center; color: #718096;">Загрузка базы аэропортов...</td>
+                                <td colspan="5">Loading airport database...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -43,8 +43,8 @@ const AirportsPage = {
             if (!airports || airports.length === 0) {
                 tableBody.innerHTML = `
                     <tr>
-                        <td colspan="5" style="text-align: center; padding: 20px; color: #718096;">
-                            Аэропорты не найдены
+                        <td colspan="5">
+                            No airports found
                         </td>
                     </tr>`;
                 return;
@@ -53,10 +53,10 @@ const AirportsPage = {
             let rowsHtml = '';
             airports.forEach(airport => {
                 rowsHtml += `
-                    <tr class="clickable-row" data-code="${airport.code}" style="cursor: pointer;">
-                        <td><span class="airport-badge" style="font-size: 0.95rem; padding: 4px 8px;">${airport.code}</span></td>
+                    <tr class="clickable-row" data-code="${airport.code}">
+                        <td><span class="airport-badge">${airport.code}</span></td>
                         <td><strong>${airport.city}</strong></td>
-                        <td style="color: #4a5568;">${airport.name}</td>
+                        <td>${airport.name}</td>
                     </tr>
                 `;
             });
@@ -90,8 +90,8 @@ const AirportsPage = {
                     renderTable(allAirports);
                 })
                 .catch(err => {
-                    console.error("Ошибка загрузки аэропортов:", err);
-                    tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center; color: red;">Ошибка сервера при загрузке данных</td></tr>`;
+                    console.error("Error loading airports:", err);
+                    tableBody.innerHTML = `<tr><td colspan="5">Server error while loading data</td></tr>`;
                 });
         }
 

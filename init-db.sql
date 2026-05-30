@@ -12,7 +12,14 @@ CREATE TABLE IF NOT EXISTS airplanes (
     tail_number VARCHAR(20) UNIQUE NOT NULL,
     model VARCHAR(50) NOT NULL,
     capacity INTEGER NOT NULL,
-    image_path VARCHAR(255)
+    current_airport_id INTEGER,
+    status VARCHAR(20) NOT NULL DEFAULT 'Active',
+    image_path VARCHAR(255),
+
+    CONSTRAINT fk_airplane_current_airport
+        FOREIGN KEY (current_airport_id)
+        REFERENCES airports(id)
+        ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS flights (
@@ -24,6 +31,7 @@ CREATE TABLE IF NOT EXISTS flights (
     departure_time TIMESTAMP WITH TIME ZONE NOT NULL,
     arrival_time TIMESTAMP WITH TIME ZONE NOT NULL,
     status VARCHAR(20) NOT NULL DEFAULT 'Scheduled',
+    crash_cause TEXT,
     
     CONSTRAINT fk_flight_airplane 
         FOREIGN KEY (airplane_id) 
@@ -45,7 +53,15 @@ CREATE TABLE IF NOT EXISTS passengers (
     id SERIAL PRIMARY KEY,
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
-    passport_number VARCHAR(20) UNIQUE NOT NULL
+    passport_number VARCHAR(20) UNIQUE NOT NULL,
+    current_airport_id INTEGER,
+    status VARCHAR(20) NOT NULL DEFAULT 'Alive',
+    image_path VARCHAR(255),
+
+    CONSTRAINT fk_passenger_current_airport
+        FOREIGN KEY (current_airport_id)
+        REFERENCES airports(id)
+        ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS flight_passengers (
@@ -70,7 +86,15 @@ CREATE TABLE IF NOT EXISTS employees (
     first_name VARCHAR(50) NOT NULL,
     last_name VARCHAR(50) NOT NULL,
     role VARCHAR(50) NOT NULL,
-    employee_number VARCHAR(20) UNIQUE NOT NULL
+    employee_number VARCHAR(20) UNIQUE NOT NULL,
+    current_airport_id INTEGER,
+    status VARCHAR(20) NOT NULL DEFAULT 'Alive',
+    image_path VARCHAR(255),
+
+    CONSTRAINT fk_employee_current_airport
+        FOREIGN KEY (current_airport_id)
+        REFERENCES airports(id)
+        ON DELETE SET NULL
 );
 
 CREATE TABLE IF NOT EXISTS flight_crew (
@@ -96,8 +120,20 @@ CREATE TABLE IF NOT EXISTS users (
     email VARCHAR(100) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     role VARCHAR(20) NOT NULL DEFAULT 'User',
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+    is_verified BOOLEAN NOT NULL DEFAULT FALSE,
+    approved_by INTEGER,
+    approved_at TIMESTAMP WITH TIME ZONE,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT fk_user_approved_by
+        FOREIGN KEY (approved_by)
+        REFERENCES users(id)
+        ON DELETE SET NULL
 );
 
 CREATE INDEX IF NOT EXISTS idx_flights_departure_time ON flights(departure_time);
 CREATE INDEX IF NOT EXISTS idx_flights_status ON flights(status);
+CREATE INDEX IF NOT EXISTS idx_airplanes_status ON airplanes(status);
+CREATE INDEX IF NOT EXISTS idx_airplanes_current_airport ON airplanes(current_airport_id);
+CREATE INDEX IF NOT EXISTS idx_passengers_status ON passengers(status);
+CREATE INDEX IF NOT EXISTS idx_employees_status ON employees(status);

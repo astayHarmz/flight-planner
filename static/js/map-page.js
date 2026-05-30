@@ -131,7 +131,7 @@ const MapPage = {
                 .then(data => {
                     flightsData = data;
                 })
-                .catch(err => console.error("Ошибка загрузки рейсов:", err));
+                .catch(err => console.error("Error loading flights:", err));
         }
 
         loadFlightsFromServer();
@@ -145,9 +145,9 @@ const MapPage = {
 
         function formatDateTime(isoString) {
             const dateObj = new Date(isoString);
-            const dateStr = dateObj.toLocaleDateString('ru-RU');
-            const timeStr = dateObj.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-            return `${dateStr} в ${timeStr}`;
+            const dateStr = dateObj.toLocaleDateString();
+            const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            return `${dateStr} at ${timeStr}`;
         }
 
         function showFlightDetails(flight) {
@@ -176,20 +176,20 @@ const MapPage = {
             detailSource.addFeatures([flightPath, markerA, markerB]);
 
             sidebarData.innerHTML = `
-                <h3>Рейс ${flight.flight_number}</h3>
+                <h3>Flight ${flight.flight_number}</h3>
                 <hr style="border-color: #e2e8f0; margin: 15px 0;">
                 <img src="${flight.airplane.image_path || '/static/img/planes/default.png'}" 
-                     alt="Самолет" 
+                     alt="Aircraft" 
                      style="width: 100%; border-radius: 8px; margin-bottom: 15px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"
                      onerror="this.src='https://placehold.co/300x150?text=No+Image'">
-                <p><strong>Маршрут:</strong> ${flight.departure_airport.city} (${flight.departure_airport.code}) &rarr; ${flight.arrival_airport.city} (${flight.arrival_airport.code})</p>
-                <p><strong>Аэропорт вылета:</strong> ${flight.departure_airport.name}</p>
-                <p><strong>Аэропорт прилета:</strong> ${flight.arrival_airport.name}</p>
-                <p><strong>Время вылета:</strong> ${formatDateTime(flight.departure_time)}</p>
-                <p><strong>Время прилета:</strong> ${formatDateTime(flight.arrival_time)}</p>
-                <p><strong>Самолет:</strong> ${flight.airplane.model} (${flight.airplane.tail_number})</p>
-                <p><strong>Вместимость:</strong> ${flight.airplane.capacity} пасс.</p>
-                <p><strong>Статус:</strong> <span style="color: #3182ce; font-weight: bold;">${flight.status}</span></p>
+                <p><strong>Route:</strong> ${flight.departure_airport.city} (${flight.departure_airport.code}) &rarr; ${flight.arrival_airport.city} (${flight.arrival_airport.code})</p>
+                <p><strong>Departure Airport:</strong> ${flight.departure_airport.name}</p>
+                <p><strong>Arrival Airport:</strong> ${flight.arrival_airport.name}</p>
+                <p><strong>Departure Time:</strong> ${formatDateTime(flight.departure_time)}</p>
+                <p><strong>Arrival Time:</strong> ${formatDateTime(flight.arrival_time)}</p>
+                <p><strong>Aircraft:</strong> ${flight.airplane.model} (${flight.airplane.tail_number})</p>
+                <p><strong>Capacity:</strong> ${flight.airplane.capacity} passengers</p>
+                <p><strong>Status:</strong> <span style="color: #3182ce; font-weight: bold;">${flight.status}</span></p>
             `;
 
             sidebar.classList.add('open');
