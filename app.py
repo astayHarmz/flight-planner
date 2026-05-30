@@ -23,7 +23,7 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-change-befor
 app.config['MAX_CONTENT_LENGTH'] = 5 * 1024 * 1024
 
 ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'webp'}
-FLIGHT_CRASH_CHANCE = 0.03
+FLIGHT_CRASH_CHANCE = 0.90
 CRASH_SURVIVAL_CHANCE = 0.06
 FLIGHT_LIFECYCLE_CHECK_INTERVAL_SECONDS = 30
 CRASH_CAUSES = (
@@ -33,7 +33,7 @@ CRASH_CAUSES = (
     'Navigation system failure led the aircraft into unsafe terrain conditions.',
     'Hydraulic failure made the aircraft impossible to control safely.',
     'Runway incident during takeoff or landing caused catastrophic damage.',
-    'Fuel system failure caused power loss across critical aircraft systems.'3.dcefffee
+    'Fuel system failure caused power loss across critical aircraft systems.'
 )
 
 db.init_app(app)
@@ -147,8 +147,8 @@ def get_flight_crash_plan(flight):
     if not will_crash:
         return {"will_crash": False, "crash_time": None, "cause": None}
 
-    crash_offset_ratio = 0.1 + (get_stable_random_unit(f"{seed}:crash-time") * 0.8)
-    crash_time = flight.departure_time + timedelta(seconds=duration_seconds * crash_offset_ratio)
+    #crash_offset_ratio = 0.1 + (get_stable_random_unit(f"{seed}:crash-time") * 0.8)
+    crash_time = flight.departure_time + timedelta(seconds=duration_seconds * 0.01)
     cause_index = int(get_stable_random_unit(f"{seed}:cause") * len(CRASH_CAUSES))
 
     return {
